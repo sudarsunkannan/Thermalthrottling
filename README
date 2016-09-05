@@ -2,6 +2,7 @@
 # For the exact registers for your platform, please see, Intel software development manual
 # and search for Thermal register values.
 # TODO: More generic script for multiple sockets and configurations
+# The script uses the stream benchmark for measuring the memory bandwidth
 
 
 Usage
@@ -22,7 +23,7 @@ socket_num => 0, 1, 2
 socket_num = 1 (first socket), socket_num = 0 (second socket), socket_num = 2 ( both sockets)
 Currently, this script supports throttling for only two nodes. Will be extended soon...
 
-Note:
+Notes
 =====
 
 For thermal throttling, you should use the PCI registers using setpci command.
@@ -35,7 +36,7 @@ The basic commands go like
   done
 
 Registers
-========
+==========
 Next, for your specific CPU architecture, see the Intel software development manual for thermal control registers. They are generally 3 register for each memorysocket. In our machine, the thermal registers are ff:04.3, ff:05.3, ff:06.3.
 
 Values
@@ -46,9 +47,9 @@ apply='0x2' and for disabling throttling apply='0x0'
 $throttle - You can throttle speeds using different values. In our Intel Xeon platform
 throttle='0x1f0f' reduces bandwidth by 2x. throttle='0x0f0f' reduces by 8x. You can try difference hex values by modifying the values.
 
-Note
-==== 
-Everytime, you modify the values, make sure to run some memory bandwidth benchmark by binding to a specific memory node, and see how much bandwidth is reduced. I use the well know stream benchmark. I will notify when I get time to add the script with some notes.
+Stream benchmark
+===============
+The script uses stream benchmark for measuring the memory bandwidth.
 
 If you end up using the technique, kindly cite our paper :) 
 
