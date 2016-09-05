@@ -1,6 +1,6 @@
 #Thermal throttling for memory bandwidth reduction
 # For the exact registers for your platform, please see, Intel software development manual
-# and search for  Thermal register values.
+# and search for Thermal register values.
 # TODO: More generic script for multiple sockets and configurations
 
 
@@ -25,32 +25,30 @@ Currently, this script supports throttling for only two nodes. Will be extended 
 Note:
 =====
 
-For thermal throttling, you should use the  PCI registers using setpci command.
+For thermal throttling, you should use the PCI registers using setpci command.
 The basic commands go like 
 
-    for i in {4..6}
-    do
-        setpci -s ff:0$i.3 0x84.L=$throttle
-        setpci -s ff:0$i.3 0x48.L=$apply
-    done
+  for i in {4..6}
+  do
+    setpci -s ff:0$i.3 0x84.L=$throttle
+    setpci -s ff:0$i.3 0x48.L=$apply
+  done
 
 Registers
 ========
-Next, for the CPU architecture you use, see the Intel software development manual for thermal control registers. They are generally 3 register for each memory socket.
-In my machine, the thermal registers are ff:04.3, ff:05.3, ff:06.3.
+Next, for your specific CPU architecture, see the Intel software development manual for thermal control registers. They are generally 3 register for each memorysocket. In our machine, the thermal registers are ff:04.3, ff:05.3, ff:06.3.
 
 Values
 ====== 
-$apply - enables or disables the thermal throttling.  For enabling, you can use  hex 2.
-apply='0x2'  and for disabling throttling  apply='0x0'
+$apply - enables or disables the thermal throttling. For enabling, you can use hex 2.
+apply='0x2' and for disabling throttling apply='0x0'
 
-$throttle -  You can throttle speeds using different values.  In my Intel Xeon platform
-
-throttle='0x1f0f'  reduces bandwidth by 2x. throttle='0x0f0f' reduces by 8x. You can try difference hex values by modifying the values.
+$throttle - You can throttle speeds using different values. In our Intel Xeon platform
+throttle='0x1f0f' reduces bandwidth by 2x. throttle='0x0f0f' reduces by 8x. You can try difference hex values by modifying the values.
 
 Note
 ==== 
-Everytime, you modify the values, make sure to run some memory bandwidth benchmark  by binding to a specific  memory node, and see how much bandwidth is reduced. I use the well know stream benchmark. I will notify when I get time to add the script with some notes.
+Everytime, you modify the values, make sure to run some memory bandwidth benchmark by binding to a specific memory node, and see how much bandwidth is reduced. I use the well know stream benchmark. I will notify when I get time to add the script with some notes.
 
 If you end up using the technique, kindly cite our paper :) 
 
