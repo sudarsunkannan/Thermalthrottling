@@ -166,7 +166,7 @@ main()
     printf(HLINE);
 #pragma omp parallel
     {
-    printf ("Printing one line per active thread....\n");
+    //printf ("Printing one line per active thread....\n");
     }
 
     /* Get initial value for system clock. */

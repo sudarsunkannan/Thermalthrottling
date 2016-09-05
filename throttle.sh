@@ -4,68 +4,110 @@
 # If useful, please cite {pVM: Persistent Virtual Memory for Efficient Capacity Scaling and Object Storage}
 
 # Usage:
-# $./mem_throttle.sh socket_num throttle_value
+# sudo $./throttle.sh socket_num throttle_value
 
 # For the exact registers for your platform, please see, Intel software development manual
 # and search for  Thermal register values.
 # TODO: More generic script for multiple sockets and configurations
 
-#Which socket number to throttle. If you have more sockets in the 
-# machine, increase the case.
-if [ $1 == 0 ] #first socket
-then
-    for i in {4..6}
-    do
-        setpci -s fe:0$i.3 0x84.L=$throttle
-        setpci -s fe:0$i.3 0x48.L=$apply
-    done
-elif [ $1 == 1 ] #second socket
-then
-    for i in {4..6}
-    do
-        setpci -s ff:0$i.3 0x84.L=$throttle
-        setpci -s ff:0$i.3 0x48.L=$apply
-    done
-elif [ $1 == 2 ] #both
-then
-    for i in {4..6}
-    do
-        setpci -s fe:0$i.3 0x84.L=$throttle
-        setpci -s fe:0$i.3 0x48.L=$apply
-    done
-    for i in {4..6}
-    do
-        setpci -s ff:0$i.3 0x84.L=$throttle
-        setpci -s ff:0$i.3 0x48.L=$apply
-    done
+#default values
+throttle='0x1f0f'
+apply='0x2'
+
+if [ $# -lt 2 ]
+  then
+    echo "   "	
+    echo "Usage ./throttle.sh socket_num throttle_level"
+    echo "   "	
+    echo "Currently this script only supports two sockets, throttle_level values can be 0, 1, 2"
+    echo "TODO: More generic scripts will be updated soon..." 
+    exit	
 fi
+
+#Determines the level of throttling, takes values 0, 1, 2
+# Currently in our platform, with LEVEL=1, reduces bandwidth by ~2x-4x, 
+# for LEVEL= 2, reduces bandwidth by ~8x-10x
+let LEVEL=$2
+
+# $1= 1 (first socket), $1 = 0 (second sockets), $1 = 2 (for both sockets)
+let SOCKET_NUM=$1
+
+RUNSTREAM() {
+  #Compile stream
+  cd stream && make && cd ..
+  numactl --membind=0 stream/stream_c.exe &> throttle.out
+  numactl --membind=1 stream/stream_c.exe &>> throttle.out
+}
 
 #Throttle Values. Modify values specific to your platforms using 
 #development manual.
-if [ $2 == 0 ]
-then #no throttle (disables throttling)
+SET_THROTTLE_VALUES() {
+  if [ $LEVEL == 0 ]
+  then #no throttle (disables throttling)
     throttle='0xffff'
     apply='0x0'
 
-elif [ $2 == 1 ] # reduces bandwidth by 2x
-then #2x
+  elif [ $LEVEL == 1 ] # reduces bandwidth by 2x
+  then #2x
     throttle='0x1f0f'
     apply='0x2'
-elif [ $2 == 2 ]  # reduces bandwidth by 8x
-then #5x
+  elif [ $LEVEL == 2 ]  # reduces bandwidth by 8x
+  then #5x
     throttle='0x0f0f'
     apply='0x2'
-fi
+  fi
+}
 
-#After throttlig, run stream benchmark and test the bandwidth.
-sleep 4
-echo "validation"
-echo "***********************8"
+#Which socket number to throttle. If you have more sockets in the 
+# machine, increase the case.
+# The NUMA node number and PCI register socket number are reversed in our platform
+# So, we socket number for 1 for NUMA node 0, and socket number 0 for NUMA node 1
+# TODO: Test in other platforms if this holds true
 
-echo "Memory bandwidth when binding to Mem node"
-numactl --membind=0 stream/stream_c.exe 
+PERFORM_THROTTLE() {
+  if [ $SOCKET_NUM == 1 ] #first socket
+  then
+    for i in {4..6}
+    do
+        setpci -s fe:0$i.3 0x84.L=$throttle
+        setpci -s fe:0$i.3 0x48.L=$apply
+    done
+  elif [ $SOCKET_NUM == 0 ] #second socket
+  then
+    for i in {4..6}
+    do
+        setpci -s ff:0$i.3 0x84.L=$throttle
+        setpci -s ff:0$i.3 0x48.L=$apply
+    done
+  elif [ $SOCKET_NUM == 2 ] #both sockets
+  then
+    for i in {4..6}
+    do
+        setpci -s fe:0$i.3 0x84.L=$throttle
+        setpci -s fe:0$i.3 0x48.L=$apply
+    done
+    for i in {4..6}
+    do
+        setpci -s ff:0$i.3 0x84.L=$throttle
+        setpci -s ff:0$i.3 0x48.L=$apply
+    done
+  fi
+}
 
-sleep 2
+RUNSTREAM
+echo "Before throttling bandwidth of node 1 and node 2 (MB/s)"
+echo "-----------------"
+grep -r "Copy:" throttle.out | awk '{print $2}'
 
-echo "Memory bandwidth when binding to Mem node"
-numactl --membind=1 stream/stream_c.exe
+
+SET_THROTTLE_VALUES
+PERFORM_THROTTLE
+
+#Wait for sometime for throttling to take effect
+sleep 5
+
+RUNSTREAM
+echo "After throttling bandwidth of node 1 and node 2 (MB/s)"
+echo "-----------------"
+grep -r "Copy:" throttle.out | awk '{print $2}'
+
