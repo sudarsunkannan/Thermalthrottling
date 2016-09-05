@@ -9,7 +9,7 @@ Usage
 
 $ sudo ./throttle.sh socket_num throttle_level
 
-e.g., sudo $./throttle.sh 0 2
+$ sudo ./throttle.sh 0 2
 
 throttle_level values => 0, 1, 2
 
