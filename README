@@ -4,7 +4,6 @@
 # TODO: More generic script for multiple sockets and configurations
 # The script uses the stream benchmark for measuring the memory bandwidth
 
-
 Usage
 =====
 
@@ -13,19 +12,15 @@ $ sudo ./throttle.sh socket_num throttle_level
 $ sudo ./throttle.sh 0 2
 
 throttle_level values => 0, 1, 2
-
 In our platform, throttle_level=0 disables throttling, throttle_level=1 reduces bandwidth 
 by ~2x-4x, and throttle_level=2 reduces bandwidth by ~8x-10x
 
-
 socket_num => 0, 1, 2
-
 socket_num = 1 (first socket), socket_num = 0 (second socket), socket_num = 2 ( both sockets)
 Currently, this script supports throttling for only two nodes. Will be extended soon...
 
 Notes
 =====
-
 For thermal throttling, you should use the PCI registers using setpci command.
 The basic commands go like 
 
