@@ -46,7 +46,7 @@ Stream benchmark
 ===============
 The script uses stream benchmark for measuring the memory bandwidth.
 
-If you end up using the technique, kindly cite our paper :) 
+More details are available in our paper :) 
 
 @inproceedings{Kannan:2016:PPV:2901318.2901325,
  author = {Kannan, Sudarsun and Gavrilovska, Ada and Schwan, Karsten},
