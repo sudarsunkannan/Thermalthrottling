@@ -55,7 +55,7 @@
  */
 
 #ifndef N
-#   define N	2000000
+#   define N	8000000
 #endif
 #ifndef NTIMES
 #   define NTIMES	10
