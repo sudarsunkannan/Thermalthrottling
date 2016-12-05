@@ -1,7 +1,7 @@
 #!/bin/bash
 # Simple thermal throttling script for Intel Xeon (Nehalem-based) 
 # Authors Sudarsun Kannan (sudarsun@gatech,edu), Vishal Gupta
-# If useful, please cite {pVM: Persistent Virtual Memory for Efficient Capacity Scaling and Object Storage}
+
 
 # Usage:
 # sudo $./throttle.sh socket_num throttle_value
